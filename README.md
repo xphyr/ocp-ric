@@ -6,6 +6,8 @@ https://docs.o-ran-sc.org/projects/o-ran-sc-it-dep/en/latest/installation-guides
 
 ## Prerequisites
 
+Before you begin you will need to have helm2 installed on your machine.  Here are instructions for different platforms:
+
 ### For OSX
 ```
 brew install helm@2
@@ -19,6 +21,13 @@ ln -s /usr/local/opt/helm@3/bin/helm helm3
 
 ## Instructions
 
+1. Start by cloning this repo:  https://github.com/xphyr/ocp-ric.git
+2. cd ocp-ric
+3. git submodule update --init --recursive --remote 
+
+
+## Install Tiller
+
 ```
 oc login <>
 oc new-project tiller
@@ -28,47 +37,28 @@ oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p 
 # wait a minute ish for helm to rollout
 helm version
 # the output should show both client and server versions
+
+# This allows tiller full access to the cluster, which appears to be needed by the ric deployment
+oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
 ```
 
 Helm is now ready.  We will deploy RIC in a different namespace (maybe?)
 
 ### Deploy RIC
 
-```
-oc new-project ricdeploy
-oc policy add-role-to-user edit "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
-oc new-project ricplt
-oc policy add-role-to-user edit "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
-oc new-project ricxapp
-oc policy add-role-to-user edit "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
-oc new-project ricinfra
-oc policy add-role-to-user edit "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
-oc new-project ricaux
-oc policy add-role-to-user edit "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
+## Instructions
 
-cd ../dep/bin
-./deploy-ric-platform ../RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
+
+
+We now need to patch some of the Helm charts.
+
+```
+patches/apply-patch.sh
+dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
 ```
 
 
 
 ## Cleanup
 
-helm del --purge r4-a1mediator
-helm del --purge r4-alarmadapter
-helm del --purge r4-dbaas
-helm del --purge r4-e2mgr
-helm del --purge r4-e2term
-helm del --purge r4-jaegeradapter
-helm del --purge r4-o1mediator
-helm del --purge r4-rtmgr
-helm del --purge r4-submgr
-helm del --purge r4-vespamgr
-helm del --purge r4-xapp-onboarder
-helm del --purge r4-appmgr
-helm del --purge r4-infrastructure
-
-oc delete project ricxapp
-oc delete project ricplt
-oc delete project ricinfra
-oc delete project ricaux
+dep/bin/undeploy-ric-platform
