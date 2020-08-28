@@ -68,6 +68,11 @@ patches/apply-patch.sh
 dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
 ```
 
+## Networking Notes
+
+The ORAN RIC uses [kong](https://github.com/Kong/kubernetes-ingress-controller?itm_source=website&itm_medium=nav) as its ingress controller. It exposes kong using node-ports, which means that in a typical IPI install of OpenShift this just sort of works with no additional configuration. The RIC inherits the IP address that is assigned to the "*.apps.<clustername>" based on how networking/routing is set up in OpenShift. If you are in an environment that is fronted by a load balancer (haproxy or other) you will need to do some additional configuration to allow the following ports into the cluster "32080/TCP,32443/TCP" and point them to one or more worker nodes to complete the network connection.
+
+
 ## Cleanup
 
 dep/bin/undeploy-ric-platform
