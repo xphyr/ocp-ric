@@ -8,3 +8,7 @@ cp patches/e2term-deployment.yaml dep/ric-dep/helm/e2term/templates/deployment.y
 cp patches/e2term-values.yaml dep/ric-dep/helm/e2term/templates/values.yaml
 echo Updating o1mediator deployment template
 cp patches/o1mediator-deployment.yaml dep/ric-dep/helm/o1mediator/templates/deployment.yaml
+echo Updating installer
+cp patches/ric-dep-bin-install dep/ric-dep/bin/install
+echo Removing something
+rm dep/ric-dep/helm/alarmadapter/templates/appconfig.yaml

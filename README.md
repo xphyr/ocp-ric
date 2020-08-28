@@ -18,9 +18,9 @@ oc create -f load-sctp-module.yaml
 
 *NOTE:* This will restart all your worker nodes!
 
-If you do not do this, you will not be able to deploy the ORAN setup.
+If you do not do this, you will not be able to deploy the ORAN setup.  This will show up as an error about "sctp protocol not supported" when you deploy the RIC.
 
-
+### Workstation/Client setup
 Before you begin you will need to have helm2 installed on your machine.  Here are instructions for different platforms:
 
 ### For OSX
@@ -33,13 +33,11 @@ ln -s /usr/local/opt/helm@2/bin/helm helm
 ln -s /usr/local/opt/helm@3/bin/helm helm3
 ```
 
-
 ## Instructions
 
 1. Start by cloning this repo:  https://github.com/xphyr/ocp-ric.git
 2. cd ocp-ric
 3. git submodule update --init --recursive --remote 
-
 
 ## Install Tiller
 
@@ -63,17 +61,19 @@ Helm is now ready.  We will deploy RIC in a different namespace (maybe?)
 
 ## Instructions
 
-
-
-We now need to patch some of the Helm charts.
+We now need to patch some of the Helm charts and update the installer script to update the default security context used by the ricplt namespace.
 
 ```
 patches/apply-patch.sh
 dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
 ```
 
-
-
 ## Cleanup
 
 dep/bin/undeploy-ric-platform
+
+
+
+# Scratchspace
+
+Error: release r4-alarmadapter failed: configmaps "configmap-ricplt-alarmadapter-appconfig" already exists
