@@ -120,6 +120,9 @@ echo "Deploying RIC infra components [$COMPONENTS]"
 if ! kubectl get ns ${PLTNAMESPACE:-ricplt}> /dev/null 2>&1; then
     oc new-project ${PLTNAMESPACE:-ricplt}
     oc adm policy add-scc-to-user anyuid -z default
+    oc adm policy add-scc-to-user anyuid -z r4-infrastructure-kong
+    oc adm policy add-scc-to-user anyuid -z r4-infrastructure-prometheus-alertmanager
+    oc adm policy add-scc-to-user anyuid -z r4-infrastructure-prometheus-server
 fi
 if ! kubectl get ns ${INFRANAMESPACE:-ricinfra}> /dev/null 2>&1; then
     kubectl create ns ${INFRANAMESPACE:-ricinfra}
