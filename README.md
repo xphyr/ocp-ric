@@ -37,7 +37,7 @@ Download the latest package from https://github.com/helm/helm/releases. Example:
 Run the following commands:
 ```
 tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
-mv linux-amd64/helm /usr/local/bin/helm
+sudo mv linux-amd64/helm /usr/local/bin/helm
 ```
 
 ## Instructions
