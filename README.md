@@ -9,7 +9,7 @@ https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html
 
 ### Cluster
 
-The E2Term applciation requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin run the following:
+The E2Term applciation requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin, create the load-sctp-module.yaml file using the template in the provided URL then run the following:
 
 ```
 oc login
