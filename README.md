@@ -9,7 +9,7 @@ https://docs.openshift.com/container-platform/4.5/networking/using-sctp.html
 
 ### Cluster
 
-The E2Term application requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin run the following:
+The E2Term application requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin, create the load-sctp-module.yaml file using the template in the provided URL then run the following:
 
 ```
 oc login
@@ -31,6 +31,13 @@ cd /usr/local/bin
 ln -s /usr/local/opt/helm@2/bin/tiller tiller
 ln -s /usr/local/opt/helm@2/bin/helm helm
 ln -s /usr/local/opt/helm@3/bin/helm helm3
+```
+### For Linux jumphost
+Download the latest package from https://github.com/helm/helm/releases. Example: https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
+Run the following commands:
+```
+tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
+sudo mv linux-amd64/helm /usr/local/bin/helm
 ```
 
 ## Instructions
