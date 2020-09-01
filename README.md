@@ -2,14 +2,14 @@ The following is based on:
 
 https://www.openshift.com/blog/getting-started-helm-openshift
 https://docs.o-ran-sc.org/projects/o-ran-sc-it-dep/en/latest/installation-guides.html#prerequisites
-https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html
+https://docs.openshift.com/container-platform/4.5/networking/using-sctp.html
 
 
 ## Prerequisites
 
 ### Cluster
 
-The E2Term applciation requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin run the following:
+The E2Term application requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin run the following:
 
 ```
 oc login
@@ -37,7 +37,7 @@ ln -s /usr/local/opt/helm@3/bin/helm helm3
 
 1. Start by cloning this repo:  https://github.com/xphyr/ocp-ric.git
 2. cd ocp-ric
-3. git submodule update --init --recursive --remote 
+3. git submodule update --init --recursive --remote
 
 ## Install Tiller
 
