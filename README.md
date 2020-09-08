@@ -33,7 +33,7 @@ ln -s /usr/local/opt/helm@2/bin/helm helm
 ln -s /usr/local/opt/helm@3/bin/helm helm3
 ```
 ### For Linux jumphost
-Download the latest package from https://github.com/helm/helm/releases. Example: https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
+Download the latest Helm v2 package from https://github.com/helm/helm/releases. Example: https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
 Run the following commands:
 ```
 tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
