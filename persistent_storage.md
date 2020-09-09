@@ -38,11 +38,25 @@ vi local-storage-block.yaml
 oc create -f local-storage-block.yaml
 ```
 
+#### Verify the `localblock` storage class is created.
+```
+oc get storageclass
+```
+
+#### Install the OCS operator from OperatorHub and create an OCS service using the same link referenced above.
+https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.4/html/deploying_openshift_container_storage/deploying-openshift-container-storage-on-openshift-container-platform_rhocs#installing-openshift-container-storage-operator-using-the-operator-hub_aws-vmware
+
+#### Verify you the storage classes have been created
+```
+oc get storageclass
+```
+
 ## Making Ceph RBD the default storage class
 
 #### Follow the reference below
 https://docs.openshift.com/container-platform/4.5/storage/dynamic-provisioning.html#change-default-storage-class_dynamic-provisioning
 
 
-## Updating the O-RAN Helm charts
+## Updating the O-RAN Helm charts to use OCS
+
 
