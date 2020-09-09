@@ -113,8 +113,6 @@ spec:
           - mountPath: /tmp/rmr_verbose
             name: local-router-file
             subPath: rmr_verbose
-          - mountPath: /opt/e2/log
-            name: log-volume
 {{ if .pizpub.enabled }}
           - mountPath: "{{ .env.messagecollectorfile }}"
             name: vol-shared
@@ -154,7 +152,6 @@ spec:
               command: [ "/bin/sh", "-c", "{{ $health.readiness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }}" ]
             initialDelaySeconds: {{ $health.readiness.initialDelaySeconds }}
             periodSeconds: {{ $health.readiness.periodSeconds }}
-            timeoutSeconds: 10
           {{- end }}
           {{- if eq $health.liveness.enabled true }}
           livenessProbe:
@@ -162,7 +159,6 @@ spec:
               command: [ "/bin/sh", "-c", "{{ $health.liveness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }}" ]
             initialDelaySeconds: {{ $health.liveness.initialDelaySeconds }}
             periodSeconds: {{ $health.liveness.periodSeconds }}
-            timeoutSeconds: 10
           {{- end }}
 {{ if .pizpub.enabled }}
         - name: {{ include "common.containername.e2term" $topCtx }}-pizpub
@@ -187,8 +183,6 @@ spec:
         - name: local-router-file
           configMap:
             name: {{ include "common.configmapname.e2term" $topCtx }}-router-configmap
-        - name: log-volume
-          emptyDir: {}
 {{ if .pizpub.enabled }}
         - name: localtime
           hostPath:

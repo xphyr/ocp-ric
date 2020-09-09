@@ -7,7 +7,9 @@ https://docs.openshift.com/container-platform/4.5/networking/using-sctp.html
 
 ## Prerequisites
 
-### Cluster
+### Cluster Configuration
+
+#### Enable SCTP on your Cluster
 
 The E2Term application requires support for SCTP which is NOT enabled by default on OpenShift Clusters. In order to get SCTP enabled follow the instructions listed here https://docs.openshift.com/container-platform/4.4/networking/using-sctp.html OR as cluster admin, create the load-sctp-module.yaml file using the template in the provided URL then run the following:
 
@@ -20,7 +22,14 @@ oc create -f load-sctp-module.yaml
 
 If you do not do this, you will not be able to deploy the ORAN setup.  This will show up as an error about "sctp protocol not supported" when you deploy the RIC.
 
-The E2 application also requires RWO storage. If you do not edit the dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml and set a storage class to use for the e2term config. If you do not set a storage class it will attempt to use "hostpath" which by default does not work on OpenShift without making a configuration change. 
+#### Enable hostpath SELinux profiles
+
+The E2 application also requires RWO storage. If you do not edit the dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml and set a storage class to use for the e2term config. If you do not set a storage class it will attempt to use "hostpath" which by default does not work on OpenShift without making a configuration change.  When you apply this configuration to your cluster every worker node will have a new patch created `/mnt/pv-ricplt-e2term-alpha` and the SELinux policy for that directory updated to have "container_file_t" settings on it.
+
+```
+oc login
+oc create -f seconfig_hostpath.yaml
+```
 
 ### Workstation/Client setup
 Before you begin you will need to have helm2 installed on your machine.  Here are instructions for different platforms:
