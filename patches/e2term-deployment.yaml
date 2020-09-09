@@ -125,6 +125,12 @@ spec:
             name: vol-shared
             readOnly: false
 {{ end }}
+          env:
+            - name: MY_POD_IP_SERVICE_HOST
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
           envFrom:
             - configMapRef:
                 name: {{ include "common.configmapname.e2term" $topCtx }}-env-{{ $key }}
@@ -145,7 +151,7 @@ spec:
           {{- if eq $health.liveness.enabled true }}
           readinessProbe:
             exec:
-              command: [ "/bin/sh", "-c", "{{ $health.readiness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }} -t 10" ]
+              command: [ "/bin/sh", "-c", "{{ $health.readiness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }}" ]
             initialDelaySeconds: {{ $health.readiness.initialDelaySeconds }}
             periodSeconds: {{ $health.readiness.periodSeconds }}
             timeoutSeconds: 11
@@ -153,7 +159,7 @@ spec:
           {{- if eq $health.liveness.enabled true }}
           livenessProbe:
             exec:
-              command: [ "/bin/sh", "-c", "{{ $health.liveness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }} -t 10" ]
+              command: [ "/bin/sh", "-c", "{{ $health.liveness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }}" ]
             initialDelaySeconds: {{ $health.liveness.initialDelaySeconds }}
             periodSeconds: {{ $health.liveness.periodSeconds }}
             timeoutSeconds: 11

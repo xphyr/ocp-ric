@@ -1,0 +1,347 @@
+#!/bin/bash
+################################################################################
+#   Copyright (c) 2019 AT&T Intellectual Property.                             #
+#   Copyright (c) 2019 Nokia.                                                  #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+################################################################################
+
+
+while [ -n "$1" ]; do # while loop starts
+
+    case "$1" in
+
+    -f) OVERRIDEYAML=$2
+        shift
+        ;;
+    -c) LIST_OF_COMPONENTS=$2
+        shift
+        ;;
+    *) echo "Option $1 not recognized" ;; # In case you typed a different option other than a,b,c
+
+    esac
+
+    shift
+
+done
+
+
+if [ -z "$OVERRIDEYAML" ];then
+    echo "****************************************************************************************************************"
+    echo "                                                     ERROR                                                      "
+    echo "****************************************************************************************************************"
+    echo "RIC deployment without deployment recipe is currently disabled. Please specify an recipe with the -f option."
+    echo "****************************************************************************************************************"
+    exit 1
+fi
+
+
+HAS_RIC_COMMON_PACKAGE=$(helm search local/ric-common | grep ric-common)
+
+if [ -z "$HAS_RIC_COMMON_PACKAGE" ];then
+    echo "****************************************************************************************************************"
+    echo "                                                     ERROR                                                      "
+    echo "****************************************************************************************************************"
+    echo "Can't locate the ric-common helm package in the local repo. Please make sure that it is properly installed."
+    echo "****************************************************************************************************************"
+    exit 1
+fi
+
+HAS_AUX_COMMON_PACKAGE=$(helm search local/aux-common | grep aux-common)
+
+if [ -z "$HAS_AUX_COMMON_PACKAGE" ];then
+    echo "****************************************************************************************************************"
+    echo "                                                     ERROR                                                      "
+    echo "****************************************************************************************************************"
+    echo "Can't locate the aux-common helm package in the local repo. Please make sure that it is properly installed."
+    echo "****************************************************************************************************************"
+    exit 1
+fi
+
+
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+COMMON_BLOCK=$(cat $OVERRIDEYAML | awk '/^common:/{getline; while ($0 ~ /^ +.*|^ *$/) {print $0; if (getline == 0) {break}}}')
+NAMESPACE_BLOCK=$(cat $OVERRIDEYAML | awk '/^  namespace:/{getline; while ($0 ~ /^    .*|^ *$/) {print $0; if (getline == 0) {break}}}')
+AUXNAMESPACE=$(echo "$NAMESPACE_BLOCK" | awk '/^ *aux:/{print $2}')
+INFRANAMESPACE=$(echo "$NAMESPACE_BLOCK" | awk '/^ *infra:/{print $2}')
+RELEASE_PREFIX=$(echo "$COMMON_BLOCK" | awk '/^ *releasePrefix:/{print $2}')
+COMPONENTS=${LIST_OF_COMPONENTS:-"infrastructure dashboard ves message-router mrsub mc-stack portal aaf"}
+
+
+NODENAME=$(kubectl get node | awk 'NR>1{print $1}')
+LABELFOUND=false
+for f in $NODENAME; do
+    LABEL=$(kubectl describe node $f | grep "local-storage=enable")
+    if [ ! -z "$LABEL" ]; then
+        LABELFOUND=true
+	echo "Found lable \"local-storage=enable\" at node $f"
+    fi
+done
+  
+FOUND_STORAGECLASS=$(grep -w storageclass $OVERRIDEYAML)
+
+
+if  ! $LABELFOUND && [ -z "$FOUND_STORAGECLASS" ]; then
+    echo "***********************************************************************************************"
+    echo "*                                          ERROR!!!!!!!!!!!!!                                 *"
+    echo "***********************************************************************************************"
+    echo "* Nodes label \"local-storage=enable\" is not found in any of the cluster node.               *"
+    echo "* Please pick a node and label it using the following command.                                *"
+    echo "* kubectl label --overwrite nodes <YOUR_NODE_NAME> local-storage=enable                       *"
+    echo "***********************************************************************************************"
+
+    exit 1
+fi
+
+
+if [ -z "$FOUND_STORAGECLASS" ] && $LABELFOUND; then
+
+    DATAPATH=$(cat $DIR/../helm/dashboard/values.yaml | grep datapath | awk '{ print $2}' )
+
+
+    if [ ! -z $OVERRIDEYAML ]; then
+        DATAPATHOVERRIDE=$(cat $OVERRIDEYAML | grep datapath | awk '{ print $2}' )
+    fi
+
+    if [ ! -z "$DATAPATHOVERRIDE" ]; then
+        DATAPATH=$DATAPATHOVERRIDE
+    fi
+
+    if [ ! -d "$DATAPATH" ]; then
+        mkdir -p $DATAPATH || { echo "Directory $DATAPATH does not exist and you don't have permission to create it. Please choose a different datapath." ; exit 1 ; }
+    fi
+
+    echo "***********************************************************************************************"
+    echo "*                                          WARNING!!!!!!!!!!!!!                               *"
+    echo "***********************************************************************************************"
+    echo "* Dashboard will use local storage. Please make sure that directory                           *"
+    echo "* $DATAPATH                                                                                   *"
+    echo "* contains the proper files.                                                                  *"
+    echo "***********************************************************************************************"
+
+fi
+
+
+LABELFOUND=false
+for f in $NODENAME; do
+    LABEL=$(kubectl describe node $f | grep "portal-storage=enable")
+    if [ ! -z "$LABEL" ]; then
+        LABELFOUND=true
+	echo "Found lable \"portal-storage=enable\" at node $f"
+    fi
+done
+
+if  ! $LABELFOUND; then
+    echo "***********************************************************************************************"
+    echo "*                                          ERROR!!!!!!!!!!!!!                                 *"
+    echo "***********************************************************************************************"
+    echo "* Nodes label \"portal-storage=enable\" is not found in any of the cluster node.               *"
+    echo "* Please pick a node and label it using the following command.   i                             *"
+    echo "* kubectl label --overwrite nodes <YOUR_NODE_NAME> portal-storage=enable                       *"
+    echo "***********************************************************************************************"
+
+    exit 1
+fi
+
+
+
+if ! kubectl get ns ${AUXNAMESPACE:-ricaux}> /dev/null 2>&1; then
+    kubectl create ns ${AUXNAMESPACE:-ricaux}
+fi
+if ! kubectl get ns ${INFRANAMESPACE:-ricinfra}> /dev/null 2>&1; then
+    kubectl create ns ${INFRANAMESPACE:-ricinfra}
+fi
+if ! kubectl get ns onap > /dev/null 2>&1; then
+    kubectl create ns onap
+fi
+
+
+
+
+echo Add cluster roles
+    cat >ricaux-role.yaml <<EOF
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ricaux-system-default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+  - apiGroups: ["batch"]
+    resources: ["jobs/status"]
+    verbs: ["get"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ricaux-system-default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ricaux-system-default
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ${AUXNAMESPACE:-ricaux}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: onap-system-default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets/status"]
+    verbs: ["get"]
+  - apiGroups: ["batch"]
+    resources: ["jobs/status"]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: onap-system-default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: onap-system-default
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: onap
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ricaux-system-tiller
+rules:
+  - apiGroups: [""]
+    resources: ["deployments"]
+    verbs: ["get", "list", "create", "delete"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "create", "delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list", "watch", "get"]
+  - apiGroups: ["configuration.konghq.com"]
+    resources: ["kongconsumers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["configuration.konghq.com"]
+    resources: ["kongcredentials"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["configuration.konghq.com"]
+    resources: ["kongingresses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["configuration.konghq.com"]
+    resources: ["kongplugins"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["ingresses/status"]
+    verbs: ["update"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses/status"]
+    verbs: ["update"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "create", "delete", "watch"]
+  - apiGroups: ["danm.k8s.io"]
+    resources: ["clusternetworks"]
+    verbs: ["get", "list", "create", "delete"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "create", "delete"]
+
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ricaux-system-tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ricaux-system-tiller
+subjects:
+  - kind: ServiceAccount
+    name: tiller
+    namespace: kube-system
+EOF
+kubectl apply -f ricaux-role.yaml
+rm ricaux-role.yaml
+
+kubectl create configmap -n ${AUXNAMESPACE:-ricaux} aux-recipe --from-file=recipe=$OVERRIDEYAML
+
+
+
+echo "Clean up dockerdata-nfs directory"
+#rm -rf /dockerdata-nfs/*
+
+
+echo "Deploying AUX components [$COMPONENTS]"
+
+
+
+for component in $COMPONENTS; do
+    helm dep up $DIR/../helm/$component
+    case "$component" in
+            aaf)
+                NODENAME=$(kubectl get node | awk 'NR>1{print $1}')
+                LABELFOUND=false
+                for f in $NODENAME; do
+                    LABEL=$(kubectl describe node $f | grep "aaf-storage=enable")
+                    if [ ! -z "$LABEL" ]; then
+                        LABELFOUND=true
+	                echo "Found lable \"aaf-storage=enable\" at node $f"
+                    fi
+                done
+                
+                if  ! $LABELFOUND; then
+                    echo "***********************************************************************************************"
+                    echo "*                                          ERROR!!!!!!!!!!!!!                                 *"
+                    echo "***********************************************************************************************"
+                    echo "* Nodes label \"aaf-storage=enable\" is not found in any of the cluster node.               *"
+                    echo "* Please pick a node and label it using the following command.                                *"
+                    echo "* kubectl label --overwrite nodes <YOUR_NODE_NAME> aaf-storage=enable                       *"
+                    echo "***********************************************************************************************"
+                else
+		                helm install -f $OVERRIDEYAML --namespace "onap" --name "${RELEASE_PREFIX}-$component" $DIR/../helm/$component
+                fi
+            ;;
+            *)
+                helm install -f $OVERRIDEYAML --namespace "${AUXNAMESPACE:-ricaux}" --name "${RELEASE_PREFIX}-$component" $DIR/../helm/$component
+		sleep 8 
+    esac
+
+done

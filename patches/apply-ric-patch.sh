@@ -7,10 +7,11 @@ echo Updating vespamgr deployment template
 cp patches/vespamgr-deployment.yaml dep/ric-dep/helm/vespamgr/templates/deployment.yaml
 echo Updating e2term deployment template
 cp patches/e2term-deployment.yaml dep/ric-dep/helm/e2term/templates/deployment.yaml
+cp patches/e2term-env.yaml dep/ric-dep/helm/e2term/templates/env.yaml
 # cp patches/e2term-values.yaml dep/ric-dep/helm/e2term/templates/values.yaml
 echo Updating appmgr deployment template
 cp patches/appmgr-deployment.yaml dep/ric-dep/helm/appmgr/templates/deployment.yaml
 echo Updating installer
 cp patches/ric-dep-bin-install dep/ric-dep/bin/install
-echo Removing something
-rm dep/ric-dep/helm/alarmadapter/templates/appconfig.yaml
+# echo Removing something
+# rm dep/ric-dep/helm/alarmadapter/templates/appconfig.yaml

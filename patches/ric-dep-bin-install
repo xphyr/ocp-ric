@@ -119,12 +119,22 @@ echo "Deploying RIC infra components [$COMPONENTS]"
 
 if ! kubectl get ns ${PLTNAMESPACE:-ricplt}> /dev/null 2>&1; then
     oc new-project ${PLTNAMESPACE:-ricplt}
+    #oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:ricplt:default"
+    #oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:ricplt:svcacct-ricplt-appmgr"
+    #oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:ricplt:svcacct-ricplt-o1mediator"
+    #oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:ricplt:r4-infrastructure-kong"
+    #oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:ricplt:r4-infrastructure-prometheus-alertmanager"
+    #oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:ricplt:r4-infrastructure-prometheus-server"
+
     oc adm policy add-scc-to-user anyuid -z default
     oc adm policy add-scc-to-user anyuid -z svcacct-ricplt-appmgr
     oc adm policy add-scc-to-user anyuid -z svcacct-ricplt-o1mediator
     oc adm policy add-scc-to-user anyuid -z r4-infrastructure-kong
     oc adm policy add-scc-to-user anyuid -z r4-infrastructure-prometheus-alertmanager
     oc adm policy add-scc-to-user anyuid -z r4-infrastructure-prometheus-server
+    # I do not believe that the e2 app requires multicast but not 100% sure. Leaving here for now 
+    # but commented out.
+    # oc annotate netnamespace ricplt netnamespace.network.openshift.io/multicast-enabled=true
 fi
 if ! kubectl get ns ${INFRANAMESPACE:-ricinfra}> /dev/null 2>&1; then
     kubectl create ns ${INFRANAMESPACE:-ricinfra}

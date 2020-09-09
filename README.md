@@ -20,6 +20,8 @@ oc create -f load-sctp-module.yaml
 
 If you do not do this, you will not be able to deploy the ORAN setup.  This will show up as an error about "sctp protocol not supported" when you deploy the RIC.
 
+The E2 application also requires RWO storage. If you do not edit the dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml and set a storage class to use for the e2term config. If you do not set a storage class it will attempt to use "hostpath" which by default does not work on OpenShift without making a configuration change. 
+
 ### Workstation/Client setup
 Before you begin you will need to have helm2 installed on your machine.  Here are instructions for different platforms:
 
@@ -71,7 +73,7 @@ Helm is now ready.  We will deploy RIC in a different namespace (maybe?)
 We now need to patch some of the Helm charts and update the installer script to update the default security context used by the ricplt namespace.
 
 ```
-patches/apply-patch.sh
+patches/apply-ric-patch.sh
 dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
 ```
 
@@ -79,11 +81,22 @@ dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
 
 The ORAN RIC uses [kong](https://github.com/Kong/kubernetes-ingress-controller?itm_source=website&itm_medium=nav) as its ingress controller. It exposes kong using node-ports. Depending on your hosting platform (AWS, GCP, Azure, VMWare, Bare Metal, etc) some additional configuration may be necessary. Configurations such as an IPI install on VMWare or RHV will not require any additional configuration and will leverage the "*.apps.<clustername>" IP address. If you are in an environment that is fronted by a load balancer (haproxy or platform load balancer such as ELB, etc) you will need to do some additional configuration to allow the following ports into the cluster "32080/TCP,32443/TCP" and point them to one or more worker nodes to complete the network connection.
 
-
 ## Cleanup
 
 dep/bin/undeploy-ric-platform
 
+### Deploy the AUX
+
+The AUX installer requires that nodes be labeled to deploy the components if you are using local-storage. If you are using a different storage class, be sure to update that in the ../RECIPE_EXAMPLE/AUX/example_recipe.yaml before running the install.
+
+```
+patches/apply-aux-patch.sh
+dep/bin/deploy-ric-aux dep/RECIPE_EXAMPLE/AUX/example_recipe.yaml
+```
+
+## Undeploy the AUX
+
+dep/bin/undeploy-ric-aux
 
 
 # Scratchspace
