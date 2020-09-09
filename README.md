@@ -51,6 +51,9 @@ tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin/helm
 ```
 
+### Using Ceph for persistent storage - Optional
+If you would like to use OpenShift Container Storage (Ceph) for persistent storage, please follow the instructions in https://github.com/xphyr/ocp-ric/blob/master/persistent_storage.md
+
 ## Instructions
 
 1. Start by cloning this repo:  https://github.com/xphyr/ocp-ric.git
