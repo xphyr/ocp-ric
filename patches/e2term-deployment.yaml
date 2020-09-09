@@ -154,7 +154,7 @@ spec:
               command: [ "/bin/sh", "-c", "{{ $health.readiness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }}" ]
             initialDelaySeconds: {{ $health.readiness.initialDelaySeconds }}
             periodSeconds: {{ $health.readiness.periodSeconds }}
-            timeoutSeconds: 11
+            timeoutSeconds: 10
           {{- end }}
           {{- if eq $health.liveness.enabled true }}
           livenessProbe:
@@ -162,7 +162,7 @@ spec:
               command: [ "/bin/sh", "-c", "{{ $health.liveness.command }}:{{ include "common.serviceport.e2term.rmr.data" . }}" ]
             initialDelaySeconds: {{ $health.liveness.initialDelaySeconds }}
             periodSeconds: {{ $health.liveness.periodSeconds }}
-            timeoutSeconds: 11
+            timeoutSeconds: 10
           {{- end }}
 {{ if .pizpub.enabled }}
         - name: {{ include "common.containername.e2term" $topCtx }}-pizpub
