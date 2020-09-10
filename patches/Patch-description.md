@@ -2,7 +2,7 @@
 
 ## Intro
 
-This document explains the reasoning behind each "patch file" listed in this directory required to get the o-ran-sc "bronze" release to work on OpenShift Container Platform v4.5. The changes listed here are the minimum required changes required to make the software deploy. There are other places for improvement (including updating the application to not require running as root) to better secure the application but can be addressed at a later time.
+This document explains the reasoning behind each "patch file" listed in this directory required to get the [O-RAN-SC](https://o-ran-sc.org/) [Bronze release](https://wiki.o-ran-sc.org/pages/viewpage.action?pageId=14221635) to work on [OpenShift Container Platform](https://www.openshift.com/) v4.5. The changes listed here are the minimum required changes required to make the software deploy. There are other places for improvement (including updating the application to not require running as root) to better secure the application but can be addressed at a later time.
 
 This document is broken out into four sections the "platform", "ric", "aux" and "xapps" areas. Each will address the patches that were created for that specific portion of the O-RAN.
 

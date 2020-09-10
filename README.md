@@ -90,6 +90,15 @@ dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
 
 The ORAN RIC uses [kong](https://github.com/Kong/kubernetes-ingress-controller?itm_source=website&itm_medium=nav) as its ingress controller. It exposes kong using node-ports. Depending on your hosting platform (AWS, GCP, Azure, VMWare, Bare Metal, etc) some additional configuration may be necessary. Configurations such as an IPI install on VMWare or RHV will not require any additional configuration and will leverage the "*.apps.<clustername>" IP address. If you are in an environment that is fronted by a load balancer (haproxy or platform load balancer such as ELB, etc) you will need to do some additional configuration to allow the following ports into the cluster "32080/TCP,32443/TCP" and point them to one or more worker nodes to complete the network connection.
 
+## Deploying the HelloWorld Xapp in the RIC
+
+The Hello World example xapp can be deployed once you have a fully working RIC. The files from the ORAN-SC assume the deployment is to localhost, so a slightly updated script can be found in the patches directory.  To use the updated script run the following commands:
+
+```
+export richost=<ip address of the cluster per the networking notes above>
+patches/xapp-hw.sh
+```
+
 ## Cleanup
 
 dep/bin/undeploy-ric-platform
