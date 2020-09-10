@@ -36,6 +36,8 @@ in the "additionalNetworks" section add the following yaml, updating the device 
     }'
 ```
 
+*NOTE:* you can also use IPv6 static IP addresses. In the example above replace "191.168.1.23/24" with an IPv6 address such as "2001:db8::1234/32" and you will have a static IPv6 address assigned instead.
+
 ### Assigning the additional Network to the e2term pod
 
 Once you have created the new network at the cluster level, edit the e2term deployment and add the following to the deployment spec:
