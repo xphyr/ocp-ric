@@ -14,29 +14,35 @@ Start by running the following command:
 
 `oc edit networks.operator.openshift.io cluster`
 
-in the "additionalNetworks" section add the following yaml, updating the device name for the secondary card on your hosts and update the IP address with the address you would like to assign.
+in the "spec/additionalNetworks" section add the following yaml, updating the device name for the secondary card on your hosts and update the IP address with the address you would like to assign.
 
 ```
-- name: e2ric
-    namespace: ricplt
-    type: Raw
-    rawCNIConfig: '{
-        "cniVersion": "0.3.1",
-        "name": "e2ric-network-1",
-        "type": "host-device",
-        "device": "ens224",
-        "ipam": {
-            "type": "static",
-            "addresses": [
-            {
-                "address": "191.168.1.23/24",
+spec:
+    additionalNetworks:
+    - name: e2ric
+        namespace: ricplt
+        type: Raw
+        rawCNIConfig: '{
+            "cniVersion": "0.3.1",
+            "name": "e2ric-network-1",
+            "type": "host-device",
+            "device": "ens224",
+            "ipam": {
+                "type": "static",
+                "addresses": [
+                {
+                    "address": "191.168.1.23/24"
+                }
+                ]
             }
-            ]
-        }
-    }'
+        }'
 ```
 
 *NOTE:* you can also use IPv6 static IP addresses. In the example above replace "191.168.1.23/24" with an IPv6 address such as "2001:db8::1234/32" and you will have a static IPv6 address assigned instead.
+
+Validate that the network is available in the ricplt namespace run the following command:
+
+`oc get network-attachment-definitions -n ricplt`
 
 ### Assigning the additional Network to the e2term pod
 
