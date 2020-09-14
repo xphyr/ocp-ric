@@ -1,0 +1,40 @@
+---
+- name: Deploy RIC on OCP Playbook
+  hosts: localhost
+  tasks:
+    - shell: |
+        curl -o load-sctp-module.yaml https://raw.githubusercontent.com/xphyr/ocp-ric/master/load-sctp-module.yaml
+        oc create -f load-sctp-module.yaml
+        curl -o seconfig_hostpath.yaml https://raw.githubusercontent.com/xphyr/ocp-ric/master/seconfig_hostpath.yaml
+        oc create -f seconfig_hostpath.yaml
+        curl -o helm-v2.16.10-linux-amd64.tar.gz https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
+        tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
+        sudo mv linux-amd64/helm /usr/local/bin/helm
+        git clone https://github.com/xphyr/ocp-ric.git
+
+    - shell: |
+        git submodule update --init --recursive --remote
+        oc new-project tiller
+        helm init --client-only
+        oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.16.10 | oc create -f -
+        helm version
+      environment:
+        TILLER_NAMESPACE: tiller
+      args:
+        chdir: ocp-ric/
+
+    - name: wait for helm to come up
+      shell: helm version
+      register: helm_version
+      until: helm_version.stdout.find("Client") != -1
+      delay: 5
+      retries: 10
+
+    - shell: |
+        oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
+        patches/apply-ric-patch.sh
+        dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
+      environment:
+        TILLER_NAMESPACE: tiller
+      args:
+        chdir: ocp-ric/
