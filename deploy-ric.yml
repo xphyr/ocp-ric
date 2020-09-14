@@ -26,7 +26,7 @@
     - name: wait for helm to come up
       shell: helm version
       register: helm_version
-      until: helm_version.stdout.find("Client") != -1
+      until: helm_version.stdout.find("Client") != -1 and helm_version.stdout.find("Server") != -1
       delay: 5
       retries: 10
 
