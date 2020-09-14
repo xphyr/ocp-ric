@@ -1,0 +1,12 @@
+---
+- name: Undeploy RIC on OCP Playbook
+  hosts: localhost
+  tasks:
+    - shell: |
+        dep/bin/undeploy-ric-platform
+      environment:
+        TILLER_NAMESPACE: tiller
+      args:
+        chdir: ocp-ric/
+
+    - command: rm -Rf ocp-ric/
