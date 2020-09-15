@@ -17,21 +17,42 @@
         path: ocp-ric
       register: dir_to_delete
 
-    - name: Delete directory and download repo
+    - name: Delete existing directory
       shell: |
         rm -Rf ocp-ric
-        git clone https://github.com/xphyr/ocp-ric.git
       when: dir_to_delete.stat.exists and dir_to_delete.stat.isdir
+
+    - name: Clone the git repo
+      command: git clone https://github.com/xphyr/ocp-ric.git
+
+    - name: update repo
+      shell: |
+        git submodule update --init --recursive --remote
+      args:
+        chdir: ocp-ric/
+
+    - name: create tiller project and initialize helm
+      shell: |
+        oc new-project tiller
+        oc project tiller
+        helm init --client-only
+      environment:
+        TILLER_NAMESPACE: tiller
+      args:
+        chdir: ocp-ric/
+
+    - name: download tiller template
+      shell: |
+        curl -o tiller-template.yaml https://raw.githubusercontent.com/xphyr/ocp-ric/master/tiller-template.yaml
+      args:
+        chdir: ocp-ric/
 
     - name: create tiller process
       shell: |
-        git submodule update --init --recursive --remote
-        oc new-project tiller
-        helm init --client-only
         oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.16.10 | oc create -f -
-        helm version
       environment:
         TILLER_NAMESPACE: tiller
+      ignore_errors: True
       args:
         chdir: ocp-ric/
 
@@ -46,6 +67,7 @@
 
     - name: give admin access to service account, patch the ric files and deploy
       shell: |
+        oc project ricplt
         oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
         patches/apply-ric-patch.sh
         dep/bin/deploy-ric-platform dep/RECIPE_EXAMPLE/PLATFORM/example_recipe.yaml
