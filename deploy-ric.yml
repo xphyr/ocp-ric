@@ -2,7 +2,7 @@
 - name: Deploy RIC on OCP Playbook
   hosts: localhost
   tasks:
-    - name: Load sctp config and hostpath config
+    - name: Load sctp config and hostpath config, then install helm
       shell: |
         curl -o load-sctp-module.yaml https://raw.githubusercontent.com/xphyr/ocp-ric/master/load-sctp-module.yaml
         oc create -f load-sctp-module.yaml
@@ -11,7 +11,17 @@
         curl -o helm-v2.16.10-linux-amd64.tar.gz https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
         tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
         sudo mv linux-amd64/helm /usr/local/bin/helm
+
+    - name: Check if directory exists
+      stat:
+        path: ocp-ric
+      register: dir_to_delete
+
+    - name: Delete directory and download repo
+      shell: |
+        rm -Rf ocp-ric
         git clone https://github.com/xphyr/ocp-ric.git
+      when: dir_to_delete.stat.exists and dir_to_delete.stat.isdir
 
     - name: create tiller process
       shell: |
@@ -31,6 +41,8 @@
       until: helm_version.stdout.find("Client") != -1 and helm_version.stdout.find("Server") != -1
       delay: 5
       retries: 10
+      environment:
+        TILLER_NAMESPACE: tiller
 
     - name: give admin access to service account, patch the ric files and deploy
       shell: |
@@ -40,4 +52,4 @@
       environment:
         TILLER_NAMESPACE: tiller
       args:
-        chdir: ocp-ric
+        chdir: ocp-ric/
