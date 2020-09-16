@@ -65,6 +65,12 @@
       environment:
         TILLER_NAMESPACE: tiller
 
+    - name: replace storage class
+      replace:
+        path: ocp-ric/dep/ric-dep/RECIPE_EXAMPLE/example_recipe.yaml
+        regexp: 'storageClassName: local-storage'
+        replace: "storageClassName: ocs-storagecluster-ceph-rbd"
+
     - name: give admin access to service account, patch the ric files and deploy
       shell: |
         oc project ricplt
