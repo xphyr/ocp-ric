@@ -46,7 +46,7 @@ acknowledge "Verify that the on-boarded xApp indeed is listed."
 
 echo "===>  Deploy xApps"
 curl --location --request POST "http://${richost}:32080/appmgr/ric/v1/xapps" \
-     --header 'Content-Type: application/json' --data-raw '{"xappName": "hwxapp"}'
+     --header 'Content-Type: application/json' --data '{"xappName": "hwxapp"}'
 acknowledge "A \"deployed\" status indicates that the xApp has been deployed."
 # response: {"instances":null,"name":"trafficxapp","status":"deployed","version":"1.0"}
 
