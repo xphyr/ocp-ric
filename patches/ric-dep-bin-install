@@ -225,7 +225,7 @@ subjects:
     name: tiller
     namespace: kube-system
 EOF
-kubectl apply -f ricplt-role.yaml
+oc apply -f ricplt-role.yaml
 rm ricplt-role.yaml
 
 
