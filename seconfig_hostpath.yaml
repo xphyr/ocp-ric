@@ -4,6 +4,7 @@ metadata:
   name: 50-set-selinux-for-hostpath-provisioner
   labels:
     machineconfiguration.openshift.io/role: worker
+    machineconfiguration.openshift.io/role: master
 spec:
   config:
     ignition:
