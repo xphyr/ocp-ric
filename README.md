@@ -47,7 +47,7 @@ ln -s /usr/local/opt/helm@3/bin/helm helm3
 Download the latest Helm v2 package from https://github.com/helm/helm/releases. Example: https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
 Run the following commands:
 ```
-tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
+tar -zxvf helm-v2.16.12-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin/helm
 ```
 
@@ -67,7 +67,7 @@ oc login <>
 oc new-project tiller
 export TILLER_NAMESPACE=tiller
 helm init --client-only
-oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.16.10 | oc create -f -
+oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.16.12 | oc create -f -
 # wait a minute ish for helm to rollout
 helm version
 # the output should show both client and server versions
