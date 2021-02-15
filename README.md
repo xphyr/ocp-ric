@@ -67,7 +67,7 @@ oc login <>
 oc new-project tiller
 export TILLER_NAMESPACE=tiller
 helm init --client-only
-oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.16.12 | oc create -f -
+oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.17.0 | oc create -f -
 # wait a minute ish for helm to rollout
 helm version
 # the output should show both client and server versions
@@ -76,7 +76,7 @@ helm version
 oc adm policy add-cluster-role-to-user cluster-admin "system:serviceaccount:${TILLER_NAMESPACE}:tiller"
 ```
 
-Helm is now ready.  We will deploy RIC in a different namespace (maybe?)
+Helm is now ready.
 
 ### Deploy RIC
 
