@@ -49,7 +49,7 @@
 
     - name: create tiller process
       shell: |
-        oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.16.10 | oc create -f -
+        oc process -f tiller-template.yaml -p TILLER_NAMESPACE="${TILLER_NAMESPACE}" -p HELM_VERSION=v2.17.0 | oc create -f -
       environment:
         TILLER_NAMESPACE: tiller
       ignore_errors: True
