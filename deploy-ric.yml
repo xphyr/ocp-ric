@@ -8,8 +8,8 @@
         oc create -f load-sctp-module.yaml
         curl -o seconfig_hostpath.yaml https://raw.githubusercontent.com/xphyr/ocp-ric/master/seconfig_hostpath.yaml
         oc create -f seconfig_hostpath.yaml
-        curl -o helm-v2.16.10-linux-amd64.tar.gz https://get.helm.sh/helm-v2.16.10-linux-amd64.tar.gz
-        tar -zxvf helm-v2.16.10-linux-amd64.tar.gz
+        curl -o helm-v2.17.0-linux-amd64.tar.gz https://get.helm.sh/helm-v2.17.0-linux-amd64.tar.gz
+        tar -zxvf helm-v2.17.0-linux-amd64.tar.gz
         sudo mv linux-amd64/helm /usr/local/bin/helm
 
     - name: Check if directory exists
