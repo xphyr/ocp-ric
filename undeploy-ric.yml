@@ -4,6 +4,7 @@
   tasks:
     - shell: |
         dep/bin/undeploy-ric-platform
+        oc delete project tiller
       environment:
         TILLER_NAMESPACE: tiller
       args:
